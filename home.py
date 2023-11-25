@@ -33,8 +33,8 @@ def filter(flat):
 	if rent == 'no data':
 		return False
 
-	if float(rent) + float(price) > 1200:
-		return False
+	# if float(rent) + float(price) > 1200:
+	# 	return False
 
 	if lat > 51.6 or lat < 49.8 or lon < 19.3 or lon > 21:
 		return False
@@ -124,11 +124,16 @@ if url != 'finito':
 
 		url = nextLink.get('href')
 
-			
+		time.sleep(0.5)
 
-for idx, flat in enumerate(flats):
+			
+sortedFlats = sorted(flats, key=lambda x: x.lat, reverse=True)
+
+for idx, flat in enumerate(sortedFlats):
 	print(idx, end = ". ")
 	print(flat)
+	print(flat.lat)
+	print(flat.lon)
 	print()
 
 print("total records: " + str(available))
