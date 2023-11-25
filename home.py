@@ -1,8 +1,15 @@
 import requests
 import json
 import time
+from Flat import Flat
 
+url2 = 'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&filter_float_m%3Afrom=29&filter_float_m%3Ato=42&filter_float_price%3Afrom=500&filter_float_price%3Ato=1301&filter_refiners=spell_checker&suggest_filters=true&sl=186a1f64a04x51a512d9'
+url = 'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&region_id=6&filter_float_m%3Afrom=29&filter_float_m%3Ato=42&filter_float_price%3Afrom=500&filter_float_price%3Ato=1301'
 
+urls = [
+'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&region_id=6&filter_float_m%3Afrom=29&filter_float_m%3Ato=42&filter_float_price%3Afrom=500&filter_float_price%3Ato=1301',
+'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&region_id=4&filter_float_m%3Afrom=29&filter_float_m%3Ato=42&filter_float_price%3Afrom=500&filter_float_price%3Ato=1301'
+]
 
 idxg = 1
 
@@ -57,16 +64,6 @@ def checkHomes(url, idx):
 			if float(rent) + float(price) > 1200:
 				continue
 
-			# for param in params:
-			# 	if param['key'] == 'rent':
-			# 		rent = param['value']['key']
-
-			# if rent == -1:
-			# 	isRentIncluded = any(item.get('key') == 'rent' for item in params)
-			# 	if isRentIncluded == False:
-			# 		#print(json.dumps(params, indent=1))
-			# 		rent = 'no data'
-
 			if any(item.get('key') == 'm' for item in params):
 				size = next((item['value']['key'] for item in params if item.get('key') == 'm'), None)
 			
@@ -74,12 +71,14 @@ def checkHomes(url, idx):
 			str(price) + "\t" + str(rent)+ "\t" + str(size) + "\t" + str(previousPrice) + "\t" + str(promoted) + "\t" + str(urgent) + \
 			"\n" + url + "\n"
 
+			flat = Flat(city, region, regionId, price, rent, size, previousPrice, promoted, urgent, url)
+
 			if urgent:
 				print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 				print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 				print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 
-			print(record)
+			print(flat)
 			idx += 1
 
 			# file.write(record)
