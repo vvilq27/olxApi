@@ -41,11 +41,19 @@ def filter(flat):
 
 	return True
 
+def checkAdUnique(flat):
+	global uniqueUrls
+
+	if flat.url in uniqueUrls:
+		return False
+	else:
+		uniqueUrls.add(flat.url)
 
 
 def checkHomes(url, idx):
 	global idxg
 	global flats
+	
 
 	data = requests.get(url)
 	homes = data.json()['data']
@@ -84,6 +92,7 @@ def checkHomes(url, idx):
 			if any(item.get('key') == 'm' for item in params):
 				size = next((item['value']['key'] for item in params if item.get('key') == 'm'), None)
 
+
 			flat = Flat(city, region, regionId, price, rent, size, previousPrice, promoted, urgent, lat, lon, url)
 
 			if filter(flat) == False:
@@ -92,10 +101,10 @@ def checkHomes(url, idx):
 			if urgent:
 				print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 
-			flats.append(flat)
+			if checkAdUnique(flat) == False:
+				continue
 
-			# print(idx, end = ". ")
-			# print(flat)
+			flats.append(flat)
 
 			idx += 1
 
@@ -106,6 +115,7 @@ def checkHomes(url, idx):
 	return data
 
 flats = []
+uniqueUrls = set()
 
 data = checkHomes(url, idxg)
 available = data.json()['metadata']['visible_total_count']
@@ -126,7 +136,8 @@ if url != 'finito':
 
 		time.sleep(0.5)
 
-			
+
+
 sortedFlats = sorted(flats, key=lambda x: x.lat, reverse=True)
 
 for idx, flat in enumerate(sortedFlats):
