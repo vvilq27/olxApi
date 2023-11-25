@@ -8,6 +8,7 @@ url = 'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&region_
 
 urls = [
 'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&region_id=6&filter_float_m%3Afrom=29&filter_float_m%3Ato=42&filter_float_price%3Afrom=500&filter_float_price%3Ato=1301',
+'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&region_id=13&filter_float_m%3Afrom=29&filter_float_m%3Ato=42&filter_float_price%3Afrom=500&filter_float_price%3Ato=1301',
 'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&region_id=4&filter_float_m%3Afrom=29&filter_float_m%3Ato=42&filter_float_price%3Afrom=500&filter_float_price%3Ato=1301'
 ]
 
@@ -15,11 +16,31 @@ idxg = 1
 
 # slaskie region_id=6
 # malopolskie id 4
+#swietok id 13
 
 # userid + region
 #remove duplicates
 #db?
 # old prices varsav
+
+
+def filter(flat):
+	rent = flat.rent
+	price = flat.price
+	lat = flat.lat
+	lon = flat.lon
+
+	if rent == 'no data':
+		return False
+
+	if float(rent) + float(price) > 1200:
+		return False
+
+	if lat > 51.6 or lat < 49.8 or lon < 19.3 or lon > 21:
+		return False
+
+	return True
+
 
 
 def checkHomes(url, idx):
@@ -59,19 +80,13 @@ def checkHomes(url, idx):
 
 			rent = next((item['value']['key'] for item in params if item.get('key') == 'rent'), 'no data')
 
-			if rent == 'no data':
-				continue
-
-			if float(rent) + float(price) > 1200:
-				continue
-
-			if lat > 51.6 or lat < 49.8:
-				continue
-
 			if any(item.get('key') == 'm' for item in params):
 				size = next((item['value']['key'] for item in params if item.get('key') == 'm'), None)
 
 			flat = Flat(city, region, regionId, price, rent, size, previousPrice, promoted, urgent, lat, lon, url)
+
+			if filter(flat) == False:
+				continue
 
 			if urgent:
 				print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
