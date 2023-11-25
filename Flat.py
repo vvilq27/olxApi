@@ -1,5 +1,5 @@
 class Flat:
-	def __init__(self, city, region, regionId, price, rent, size, previousPrice, promoted, urgent, url):
+	def __init__(self, city, region, regionId, price, rent, size, previousPrice, promoted, urgent, lat, lon, url):
 		self.city = city 
 		self.region = region
 		self.regionId = regionId
@@ -9,13 +9,15 @@ class Flat:
 		self.previousPrice = previousPrice
 		self.promoted = promoted
 		self.urgent = urgent
+		self.lat = lat
+		self.lon = lon
 		self.url = url
 
 	def __str__(self):
-		return f"City: {self.city}, Region: {self.region}, Region ID: {self.regionId}\n" \
-			f"Price: {self.price}, Rent: {self.rent}, Size: {self.size}, " \
-			f"Previous Price: {self.previousPrice}, Promoted: {self.promoted}, Urgent: {self.urgent}\n"\
-			f"URL: {self.url}"
+		return f"{self.city}, {self.region} [{self.regionId}]\n" \
+			f"{self.price}\t{self.rent}\t{self.size}\tPrevious Price: {self.previousPrice} " \
+			f"Promoted: {self.promoted}, Urgent: {self.urgent}\n"\
+			f"{self.url}"
 
 
 

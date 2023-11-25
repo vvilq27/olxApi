@@ -4,7 +4,7 @@ import time
 from Flat import Flat
 
 url2 = 'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&filter_float_m%3Afrom=29&filter_float_m%3Ato=42&filter_float_price%3Afrom=500&filter_float_price%3Ato=1301&filter_refiners=spell_checker&suggest_filters=true&sl=186a1f64a04x51a512d9'
-url = 'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&region_id=6&filter_float_m%3Afrom=29&filter_float_m%3Ato=42&filter_float_price%3Afrom=500&filter_float_price%3Ato=1301'
+url = 'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&region_id=4&filter_float_m%3Afrom=29&filter_float_m%3Ato=42&filter_float_price%3Afrom=500&filter_float_price%3Ato=1301'
 
 urls = [
 'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&region_id=6&filter_float_m%3Afrom=29&filter_float_m%3Ato=42&filter_float_price%3Afrom=500&filter_float_price%3Ato=1301',
@@ -42,11 +42,12 @@ def checkHomes(url, idx):
 			promoted = home['promotion']['highlighted']
 			urgent = home['promotion']['urgent']
 
+			lat = home['map'].get('lat') or '-'
+			lon = home['map'].get('lon') or '-'
 
 			price = 0
 			previousPrice = 0
 			size = 0
-
 
 			params = home['params']
 
@@ -64,21 +65,21 @@ def checkHomes(url, idx):
 			if float(rent) + float(price) > 1200:
 				continue
 
+			if lat > 51.6 or lat < 49.8:
+				continue
+
 			if any(item.get('key') == 'm' for item in params):
 				size = next((item['value']['key'] for item in params if item.get('key') == 'm'), None)
-			
-			record = str(idx) + ". " + city + " " + " " + region + "[" + str(regionId) + "]\n" + \
-			str(price) + "\t" + str(rent)+ "\t" + str(size) + "\t" + str(previousPrice) + "\t" + str(promoted) + "\t" + str(urgent) + \
-			"\n" + url + "\n"
 
-			flat = Flat(city, region, regionId, price, rent, size, previousPrice, promoted, urgent, url)
+			flat = Flat(city, region, regionId, price, rent, size, previousPrice, promoted, urgent, lat, lon, url)
 
 			if urgent:
-				print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
-				print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
-				print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+				print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 
+			print(idx, end = ". ")
 			print(flat)
+			# print(str(lat) + " n " + str(lon) + " e")
+			print()
 			idx += 1
 
 			# file.write(record)
