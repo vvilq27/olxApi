@@ -45,6 +45,7 @@ def filter(flat):
 
 def checkHomes(url, idx):
 	global idxg
+	global flats
 
 	data = requests.get(url)
 	homes = data.json()['data']
@@ -91,10 +92,11 @@ def checkHomes(url, idx):
 			if urgent:
 				print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 
-			print(idx, end = ". ")
-			print(flat)
-			# print(str(lat) + " n " + str(lon) + " e")
-			print()
+			flats.append(flat)
+
+			# print(idx, end = ". ")
+			# print(flat)
+
 			idx += 1
 
 			# file.write(record)
@@ -103,6 +105,7 @@ def checkHomes(url, idx):
 
 	return data
 
+flats = []
 
 data = checkHomes(url, idxg)
 available = data.json()['metadata']['visible_total_count']
@@ -122,6 +125,11 @@ if url != 'finito':
 		url = nextLink.get('href')
 
 			
+
+for idx, flat in enumerate(flats):
+	print(idx, end = ". ")
+	print(flat)
+	print()
 
 print("total records: " + str(available))
 
