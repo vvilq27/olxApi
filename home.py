@@ -85,12 +85,9 @@ def checkHomes(url, idx):
 				if param['key'] == 'price':
 					price = param['value']['value']
 
-			previousPrice = next((item['value']['previous_value'] for item in params if item.get('key') == 'price'), None)
-
+			previousPrice = next((item['value']['previous_value'] for item in params if item.get('key') == 'price'), '-')
 			rent = next((item['value']['key'] for item in params if item.get('key') == 'rent'), 'no data')
-
-			if any(item.get('key') == 'm' for item in params):
-				size = next((item['value']['key'] for item in params if item.get('key') == 'm'), None)
+			size = next((item['value']['key'] for item in params if item.get('key') == 'm'), 'no size')
 
 
 			flat = Flat(city, region, regionId, price, rent, size, previousPrice, promoted, urgent, lat, lon, url)
