@@ -12,12 +12,14 @@ class Flat:
 		self.lat = lat
 		self.lon = lon
 		self.url = url
+		self.description = description
 
 	def __str__(self):
 		return f"{self.city}, {self.region} [{self.regionId}]\n" \
 			f"{self.price}\t{self.rent}\t{self.size}\tPrevious Price: {self.previousPrice} " \
 			f"Promoted: {self.promoted}, Urgent: {self.urgent}\n"\
-			f"{self.url}"
+			f"{self.url}\n" \
+			f"{self.description}"
 
 
 

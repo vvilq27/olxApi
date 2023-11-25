@@ -60,53 +60,50 @@ def checkHomes(url, idx):
 
 	print("homes amnt: " + str(len(homes)))
 
-	with open('homesData2.txt', 'a+') as file:
-
-		for home in homes:
-			url = home['url']
-			city = home['location']['city']['name']
-			region = home['location'].get('region').get('name') or 'no region'
-			regionId = home['location'].get('region').get('id') or 'no reg id'
+	for home in homes:
+		url = home['url']
+		city = home['location']['city']['name']
+		region = home['location'].get('region').get('name') or 'no region'
+		regionId = home['location'].get('region').get('id') or 'no reg id'
 
 
-			promoted = home['promotion']['highlighted']
-			urgent = home['promotion']['urgent']
+		description = home['description']
+		promoted = home['promotion']['highlighted']
+		urgent = home['promotion']['urgent']
 
-			lat = home['map'].get('lat') or '-'
-			lon = home['map'].get('lon') or '-'
+		lat = home['map'].get('lat') or '-'
+		lon = home['map'].get('lon') or '-'
 
-			price = 0
-			previousPrice = 0
-			size = 0
+		price = 0
+		previousPrice = 0
+		size = 0
 
-			params = home['params']
+		params = home['params']
 
-			for param in params:
-				if param['key'] == 'price':
-					price = param['value']['value']
+		for param in params:
+			if param['key'] == 'price':
+				price = param['value']['value']
 
-			previousPrice = next((item['value']['previous_value'] for item in params if item.get('key') == 'price'), '-')
-			rent = next((item['value']['key'] for item in params if item.get('key') == 'rent'), 'no data')
-			size = next((item['value']['key'] for item in params if item.get('key') == 'm'), 'no size')
+		previousPrice = next((item['value']['previous_value'] for item in params if item.get('key') == 'price'), '-')
+		rent = next((item['value']['key'] for item in params if item.get('key') == 'rent'), 'no data')
+		size = next((item['value']['key'] for item in params if item.get('key') == 'm'), 'no size')
 
 
-			flat = Flat(city, region, regionId, price, rent, size, previousPrice, promoted, urgent, lat, lon, url)
+		flat = Flat(city, region, regionId, price, rent, size, previousPrice, promoted, urgent, lat, lon, url, description)
 
-			if filter(flat) == False:
-				continue
+		if filter(flat) == False:
+			continue
 
-			if urgent:\
+		if urgent:\
 
-				print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+			print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 
-			if checkAdUnique(flat) == False:
-				continue
+		if checkAdUnique(flat) == False:
+			continue
 
-			flats.append(flat)
+		flats.append(flat)
 
-			idx += 1
-
-			# file.write(record)
+		idx += 1
 
 	idxg = idx
 
@@ -155,13 +152,19 @@ regions = {4:[], 6:[], 13:[]}
 for flat in sortedFlats:
 	regions[flat.regionId].append(flat)
 
+with open('homesData2.txt', 'a+', encoding='utf-8') as file:
 
-for r in regions:
-	print('\n\n')
-	for flat in regions[r]:
-		print(flat)
-		print(flat.lat)
-		print(flat.lon)
-		print()
+	for r in regions:
+		print('\n\n')
+		for id, flat in enumerate(regions[r]):
+			print(str(id) + ". ", end= "")
+			print(flat)
+			print()
+
+			file.write(str(id) + ". ")
+			file.write(flat.__str__())
+			file.write("\n\n")
+
+
 
 
