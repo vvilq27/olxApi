@@ -1,5 +1,5 @@
 class Flat:
-	def __init__(self, city, region, regionId, price, rent, size, previousPrice, promoted, urgent, lat, lon, url):
+	def __init__(self, city, region, regionId, price, rent, size, previousPrice, promoted, urgent, lat, lon, url,  description = ''):
 		self.city = city 
 		self.region = region
 		self.regionId = regionId

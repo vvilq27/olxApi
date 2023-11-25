@@ -33,10 +33,10 @@ def filter(flat):
 	if rent == 'no data':
 		return False
 
-	# if float(rent) + float(price) > 1200:
-	# 	return False
+	if float(rent) + float(price) > 1400:
+		return False
 
-	if lat > 51.6 or lat < 49.8 or lon < 19.3 or lon > 21:
+	if lat > 50.6 or lat < 49.8 or lon < 19.3 or lon > 21:
 		return False
 
 	return True
@@ -95,7 +95,8 @@ def checkHomes(url, idx):
 			if filter(flat) == False:
 				continue
 
-			if urgent:
+			if urgent:\
+
 				print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 
 			if checkAdUnique(flat) == False:
@@ -111,39 +112,56 @@ def checkHomes(url, idx):
 
 	return data
 
+
 flats = []
 uniqueUrls = set()
 
-data = checkHomes(url, idxg)
-available = data.json()['metadata']['visible_total_count']
+for urlId, url in enumerate(urls):
+	
+	match urlId:
+		case 0:
+			print('[malopolskie]')
+		case 1:
+			print('[swietokrzyskie]')
+		case 2:
+			print('[slaskie]')
 
-nextLink = data.json()['links']['next'].get('href') or 'finito'
-url = nextLink
+	data = checkHomes(url, idxg)
+	available = data.json()['metadata']['visible_total_count']
+	print("total ads for region: " + str(available))
 
-if url != 'finito':
-	while idxg <= available:
-		data = checkHomes(url, idxg)
-		
-		nextLink = data.json()['links'].get('next') or 'finito'
-		
-		if nextLink == 'finito':
-			break;
+	nextLink = data.json()['links']['next'].get('href') or 'finito'
+	url = nextLink
 
-		url = nextLink.get('href')
+	if url != 'finito':
+		while idxg <= available:
+			data = checkHomes(url, idxg)
+			
+			nextLink = data.json()['links'].get('next') or 'finito'
+			
+			if nextLink == 'finito':
+				break;
 
-		time.sleep(0.5)
+			url = nextLink.get('href')
+
+			time.sleep(0.5)
 
 
+# sortedFlats = sorted(flats, key=lambda flat: flat.regionId)
+sortedFlats = sorted(flats, key=lambda flat: flat.lat, reverse=True)
 
-sortedFlats = sorted(flats, key=lambda x: x.lat, reverse=True)
+regions = {4:[], 6:[], 13:[]}
 
-for idx, flat in enumerate(sortedFlats):
-	print(idx, end = ". ")
-	print(flat)
-	print(flat.lat)
-	print(flat.lon)
-	print()
+for flat in sortedFlats:
+	regions[flat.regionId].append(flat)
 
-print("total records: " + str(available))
+
+for r in regions:
+	print('\n\n')
+	for flat in regions[r]:
+		print(flat)
+		print(flat.lat)
+		print(flat.lon)
+		print()
 
 
