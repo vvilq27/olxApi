@@ -15,65 +15,74 @@ class Region:
 			"regionId": self.regionId
 		}
 
-class Flat:
-	def __init__(self, city, regionName, regionId, price, rent, size, previousPrice, promoted, urgent, lat, lon, url,  description = ''):
+	def __str__(self):
+		return f"""\t\"name\": {self.region},
+	\"city\": {self.city},
+	\"lat\": {self.lat},
+	\"lon\": {self.lon},
+	\"regionId\": {self.regionId}"""
 
-		self.region = Region(city, regionName, regionId, lat, lon)
-
-		# self.city = city 
-		# self.region = region
-		# self.regionId = regionId
+class Price:
+	def __init__(self, price, rent, size, previousPrice, promoted, urgent):
 		self.price = price
 		self.rent = rent
 		self.size = size
 		self.previousPrice = previousPrice
 		self.promoted = promoted
 		self.urgent = urgent
-		# self.lat = lat
-		# self.lon = lon
+
+	def toDict(self):
+		return {
+			"price": self.price,
+			"rent": self.rent,
+			"size": self.size,
+			"previousPrice": self.previousPrice,
+			"promoted": self.promoted,
+			"urgent": self.urgent
+		}
+
+	def __str__(self):
+		return f"""\t\"price\": {self.price},
+	\"rent\": {self.rent},
+	\"size\": {self.size},
+	\"previousPrice\": {self.previousPrice},
+	\"promoted\": {self.promoted},
+	\"urgent\": {self.urgent}"""
+
+
+class Flat:
+	def __init__(self, city = '', regionName = '', regionId = '', price= '', rent= '', size= '', previousPrice= '', promoted= '', urgent= '', lat= '', lon= '', url= '', description = '', json = None):
+
+		self.region = Region(city, regionName, regionId, lat, lon)
+		self.price = Price(price, rent, size, previousPrice, promoted, urgent)
+
 		self.url = url
 		self.description = description
 
+		if json != None:
+			jsonRegion = json.get('region')
+			jsonPricing = json.get('pricing')
 
-	# def toJson(self, previousPrice = '-'):
-	# 	return {
-	# 		"region":{
-	# 			"name": self.region,
-	# 			"city": self.city,
-	# 			"lat": self.lat,
-	# 			"lon": self.lon,
-	# 			"regionId": self.regionId
-	# 		},
-	# 		"pricing":{
-	# 			"price": self.price,
-	# 			"previousPrice": previousPrice,
-	# 			"rent": self.rent,
-	# 			"size": self.size,
-	# 			"promoted": self.promoted,
-	# 			"urgent": self.urgent
-	# 		},
-	# 		"url": self.url,
-	# 		"description": self.description			
-	# 	}
+			self.region = Region(jsonRegion.get('city'), jsonRegion.get('name'), jsonRegion.get('regionId'),
+                        jsonRegion.get('lat'), jsonRegion.get('lon'))
+
+			self.price = Price(jsonPricing.get('price'), jsonPricing.get('rent'), jsonPricing.get('size'),
+                        jsonPricing.get('previousPrice'), jsonPricing.get('promoted'),  jsonPricing.get('urgent'))
+
+
+
+	def __str__(self):
+		return "{\n\"region\": {\n" + f"{self.region}" + "\n}," +\
+		"\n\"price\": {\n" + f"{self.price}" + "\n}\n}" 
 
 	def toDict(self):
-		# return f"{self.city}, {self.region} [{self.regionId}]\n" \
-		# 	f"{self.price}\t{self.rent}\t{self.size}\tPrevious Price: {self.previousPrice} " \
-		# 	f"Promoted: {self.promoted}, Urgent: {self.urgent}\n"\
-		# 	f"{self.url}\n" 
-		# 	# f">\n{self.description}"
+			return {
+				"region" : self.region.toDict(),
+				"pricing": self.price.toDict()
+			}
 
-		return {
-			"region" : self.region.toDict(),
-			"pricing":{
-				"price": self.price,
-				"previousPrice": self.previousPrice,
-				"rent": self.rent,
-				"size": self.size,
-				"promoted": self.promoted,
-				"urgent": self.urgent
-			},
-		}
 
+	def getTotalPrice(self):
+		return int(self.price.price) + int(self.price.rent);
 
 

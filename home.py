@@ -3,9 +3,6 @@ import json
 import time
 from Flat import Flat
 
-url2 = 'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&filter_float_m%3Afrom=29&filter_float_m%3Ato=42&filter_float_price%3Afrom=500&filter_float_price%3Ato=1301&filter_refiners=spell_checker&suggest_filters=true&sl=186a1f64a04x51a512d9'
-url = 'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&region_id=4&filter_float_m%3Afrom=29&filter_float_m%3Ato=42&filter_float_price%3Afrom=500&filter_float_price%3Ato=1301'
-
 urls = [
 # 'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&region_id=6&filter_float_m%3Afrom=29&filter_float_m%3Ato=42&filter_float_price%3Afrom=500&filter_float_price%3Ato=1301',
 'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&region_id=13&filter_float_m%3Afrom=29&filter_float_m%3Ato=42&filter_float_price%3Afrom=500&filter_float_price%3Ato=1301',
@@ -18,22 +15,21 @@ idxg = 1
 # malopolskie id 4
 #swietok id 13
 
-# userid + region
-#remove duplicates
+# userid 
 #db?
 # old prices varsav
 
 
 def filter(flat):
-	rent = flat.rent
-	price = flat.price
+	rent = flat.price.rent
+	price = flat.price.price
 	lat = flat.region.lat
 	lon = flat.region.lon
 
 	if rent == 'no data':
 		return False
 
-	if float(rent) + float(price) > 1400:
+	if float(rent) + float(price) > 1800:
 		return False
 
 	# if lat > 50.6 or lat < 49.8 or lon < 19.3 or lon > 21:
@@ -89,7 +85,7 @@ def checkHomes(url, idx):
 		size = next((item['value']['key'] for item in params if item.get('key') == 'm'), 'no size')
 
 
-		flat = Flat(city, region, regionId, price, rent, size, previousPrice, promoted, urgent, lat, lon, url, description)
+		flat = Flat(city = city, regionName = region, regionId = regionId, price= price, rent = rent, size = size, previousPrice = previousPrice, promoted= promoted, urgent = urgent, lat = lat, lon= lon, url = url, description = description)
 
 		if filter(flat) == False:
 			continue
@@ -143,34 +139,17 @@ for urlId, url in enumerate(urls):
 
 			time.sleep(0.5)
 
-
-# sortedFlats = sorted(flats, key=lambda flat: flat.regionId)
 sortedFlats = sorted(flats, key=lambda flat: flat.region.lat, reverse=True)
 
 regions = {4:[], 6:[], 13:[]}
 
 for flat in sortedFlats:
-	# regions[flat.regionId].append(flat.toJson())
-	print(json.dumps(flat.toDict(), indent = 1))
+	regions[flat.region.regionId].append(flat.toDict())
+
+jsonRegions = json.dumps(regions, indent = 2, ensure_ascii=False)
 
 
 
-# print(json.dumps(regions, indent = 1))
-
-
-# with open('homesDataAllREgion2.txt', 'a+', encoding='utf-8') as file:
-
-# 	for r in regions:
-# 		print('\n\n')
-# 		for id, flat in enumerate(regions[r]):
-# 			print(str(id) + ". ", end= "")
-# 			print(flat)
-# 			print()
-
-# 			file.write(str(id) + ". ")
-# 			file.write(flat.__str__())
-# 			file.write("\n\n")
-
-
-
+with open('homesDataAll1Regions.txt', 'w+', encoding='utf-8') as file:
+	file.write(jsonRegions)
 
