@@ -41,7 +41,8 @@ urls = [
 dictUrls = {
 	'buy_krk':'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=14&region_id=4&city_id=8959&sort_by=filter_float_price%3Aasc&&filter_float_price%3Afrom={}',
 	'buy_katw_radius30':'https://www.olx.pl/api/v1/offers/?offset=0&limit=40&category_id=14&region_id=6&city_id=7691&distance=30&sort_by=filter_float_price%3Aasc&filter_float_price%3Afrom={}',
-	# 'buy_piotrkw_radius50':'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=14&region_id=7&city_id=13573&distance=50&sort_by=filter_float_price%3Aasc&&filter_float_price%3Afrom={}'
+	'buy_piotrkw_radius50':'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=14&region_id=7&city_id=13573&distance=50&sort_by=filter_float_price%3Aasc&&filter_float_price%3Afrom={}',
+	'buy_wwa': 'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=14&region_id=2&city_id=17871&sort_by=filter_float_price%3Aasc&&filter_float_price%3Afrom={}'
 }
 
 
@@ -51,74 +52,77 @@ date = datetime.today().strftime('%Y-%m-%d')
 uniqueAdIds = set()
 total = 0
 
-path = 'data/buy/' + date
+path = 'data/buy/' + date + '/2'
 
 if not os.path.exists(path):
 	os.mkdir(path)
 
-
-for url in list(ductUrls.values()):
+for urlKey in dictUrls:
+# for url in list(ductUrls.values()):
 	# url = next(iter(dictUrls.values()), None)
-	data = requests.get(url.format(fromPrice))
-	total = data.json()['metadata']['visible_total_count']
-	print(total)
+	printOnce = True
 
-	fileName = next(iter(dictUrls.keys()))
-	fileName = 'data/buy/' + date + "/" + fileName + "_" + date + '.txt'
+	urlFormated = dictUrls[urlKey].format(fromPrice)
+	fileName = path + "/" + urlKey + "_" + date + '.txt'
+
+	print(fileName)
 
 	with open(fileName, 'w+', encoding='utf-8') as file:
-		for urlKey in dictUrls:
-			urlFormated = dictUrls[urlKey].format(fromPrice)
 
-			print(".")
-			while urlFormated != 'finito':
-				print(".", end = '')
+		while urlFormated != 'finito':
+			print(".", end = '')
+			data = requests.get(urlFormated)
+
+			if printOnce:
 				data = requests.get(urlFormated)
+				total = data.json()['metadata']['visible_total_count']
+				print(total)
+				printOnce = False
 
-				if len(data.json()['data']) == 0:
-					print('\nno more flats in this area')
-					break;
+			if len(data.json()['data']) == 0:
+				print('\nno more flats in this area')
+				break;
 
-				flat = data.json()['data'][-1] 
-				lastPrice = next((item['value']['value'] for item in flat['params'] if item.get('key') == 'price'), 'no data')
+			flat = data.json()['data'][-1] 
+			lastPrice = next((item['value']['value'] for item in flat['params'] if item.get('key') == 'price'), 'no data')
 
-				flats = data.json()['data']
+			flats = data.json()['data']
 
-				idxToPop = []
-				for idx, flat in enumerate(flats):
-					adId = flat['id']
+			idxToPop = []
+			for idx, flat in enumerate(flats):
+				adId = flat['id']
 
-					if adId in uniqueAdIds:
-						idxToPop.append(idx)
-					else:
-						uniqueAdIds.add(adId)
+				if adId in uniqueAdIds:
+					idxToPop.append(idx)
+				else:
+					uniqueAdIds.add(adId)
 
-				for idx,i in enumerate(idxToPop):
-					flats.pop(i - idx) # taking care of index shifting after pop 
+			for idx,i in enumerate(idxToPop):
+				flats.pop(i - idx) # taking care of index shifting after pop 
 
-				# 				TODO
-				# each dump is put in its own [] need to be fixed
-				# collect all flats and in the end dump them all
-				json.dump(flats, file, indent=2)
+			# 				TODO
+			# each dump is put in its own [] need to be fixed
+			# collect all flats and in the end dump them all
+			json.dump(flats, file, indent=2)
 
-				nextLink = data.json()['links'].get('next') or 'finito'
-				
-				if nextLink == 'finito':
-					print("\nregion last price: " + str(lastPrice))
-					print("last link: \n" + data.json()['links'].get('self').get('href'))
+			nextLink = data.json()['links'].get('next') or 'finito'
+			
+			if nextLink == 'finito':
+				print("\nregion last price: " + str(lastPrice))
+				print("last link: \n" + data.json()['links'].get('self').get('href'))
 
-					localTotal = data.json()['metadata']['visible_total_count']
-					print("remaining flats: " + str(localTotal))
-					if localTotal < 1000:
-						lastPrice += 1
+				localTotal = data.json()['metadata']['visible_total_count']
+				print("remaining flats: " + str(localTotal))
+				if localTotal < 1000:
+					lastPrice += 1
 
-					urlFormated = dictUrls[urlKey].format(lastPrice)
-					print("get link with updated price: \n" + urlFormated)
-					continue
+				urlFormated = dictUrls[urlKey].format(lastPrice)
+				print("get link with updated price: \n" + urlFormated)
+				continue
 
-				urlFormated = nextLink.get('href')
+			urlFormated = nextLink.get('href')
 
-				time.sleep(1)
+			time.sleep(0.2)
 
 	print(total)
 	# print(uniqueAdIds)
