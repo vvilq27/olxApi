@@ -2,11 +2,16 @@ import requests
 import json
 import time
 from Flat import Flat
+from datetime import datetime
 
 urls = [
-# 'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&region_id=6&filter_float_m%3Afrom=29&filter_float_m%3Ato=42&filter_float_price%3Afrom=500&filter_float_price%3Ato=1301',
-'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&region_id=13&filter_float_m%3Afrom=29&filter_float_m%3Ato=42&filter_float_price%3Afrom=500&filter_float_price%3Ato=1301',
-# 'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&region_id=4&filter_float_m%3Afrom=29&filter_float_m%3Ato=42&filter_float_price%3Afrom=500&filter_float_price%3Ato=1301'
+# 'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&region_id=6&filter_float_m%3Afrom=29&filter_float_m%3Ato=42&filter_float_price%3Afrom=500&filter_float_price%3Ato=1301&sort_by=filter_float_price%3Aasc',
+# 'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&region_id=13&filter_float_m%3Afrom=29&filter_float_m%3Ato=42&filter_float_price%3Afrom=500&filter_float_price%3Ato=1301&sort_by=filter_float_price%3Aasc',
+'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&region_id=4&filter_float_m%3Afrom=29&filter_float_m%3Ato=42&filter_float_price%3Afrom=500&filter_float_price%3Ato=2101&sort_by=filter_float_price%3Aasc'
+
+
+# 'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&region_id=4&filter_float_m%3Afrom=29&filter_float_m%3Ato=42&filter_float_price%3Afrom=500&filter_float_price%3Ato=1200&sort_by=filter_float_price%3Aasc'
+# 'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&region_id=2&city_id=17871&filter_float_m%3Afrom=29&filter_float_m%3Ato=42&filter_float_price%3Ato=3000&&sort_by=filter_float_price%3Aasc'
 ]
 
 idxg = 1
@@ -15,10 +20,12 @@ idxg = 1
 # malopolskie id 4
 #swietok id 13
 
+
 # userid 
 #db?
-# old prices varsav
-
+# old prices varsav:
+# /api/v1/offers/metadata/search/?offset=0&limit=40&category_id=15&region_id=2&city_id=17871&filter_refiners=spell_checker&facets=%5B%7B%22field%22%3A%22district%22%2C%22fetchLabel%22%3Atrue%2C%22fetchUrl%22%3Atrue%2C%22li
+#krk id 8959
 
 def filter(flat):
 	rent = flat.price.rent
@@ -26,11 +33,11 @@ def filter(flat):
 	lat = flat.region.lat
 	lon = flat.region.lon
 
-	if rent == 'no data':
-		return False
+	# if rent == 'no data':
+	# 	return False
 
-	if float(rent) + float(price) > 1800:
-		return False
+	# if float(rent) + float(price) > 1500:
+	# 	return False
 
 	# if lat > 50.6 or lat < 49.8 or lon < 19.3 or lon > 21:
 	# 	return False
@@ -57,6 +64,8 @@ def checkHomes(url, idx):
 	print("homes amnt: " + str(len(homes)))
 
 	for home in homes:
+		userId = home['user']['id']
+		adId = home['id']
 		url = home['url']
 		city = home['location']['city']['name']
 		region = home['location'].get('region').get('name') or 'no region'
@@ -69,6 +78,9 @@ def checkHomes(url, idx):
 
 		lat = home['map'].get('lat') or '-'
 		lon = home['map'].get('lon') or '-'
+
+		photos = [photo['link'].split(';')[0] for photo in home['photos']]
+		photos = photos[:3]
 
 		price = 0
 		previousPrice = 0
@@ -85,13 +97,12 @@ def checkHomes(url, idx):
 		size = next((item['value']['key'] for item in params if item.get('key') == 'm'), 'no size')
 
 
-		flat = Flat(city = city, regionName = region, regionId = regionId, price= price, rent = rent, size = size, previousPrice = previousPrice, promoted= promoted, urgent = urgent, lat = lat, lon= lon, url = url, description = description)
+		flat = Flat(city = city, regionName = region, regionId = regionId, price= price, rent = rent, size = size, previousPrice = previousPrice, promoted= promoted, urgent = urgent, lat = lat, lon= lon, url = url, userId = userId, adId = adId, description = description, photos = photos)
 
 		if filter(flat) == False:
 			continue
 
-		if urgent:\
-
+		if urgent:
 			print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 
 		if checkAdUnique(flat) == False:
@@ -111,14 +122,6 @@ uniqueUrls = set()
 
 for urlId, url in enumerate(urls):
 	
-	match urlId:
-		case 0:
-			print('[malopolskie]')
-		case 1:
-			print('[swietokrzyskie]')
-		case 2:
-			print('[slaskie]')
-
 	data = checkHomes(url, idxg)
 	available = data.json()['metadata']['visible_total_count']
 	print("total ads for region: " + str(available))
@@ -133,23 +136,29 @@ for urlId, url in enumerate(urls):
 			nextLink = data.json()['links'].get('next') or 'finito'
 			
 			if nextLink == 'finito':
+				print('hit ads limit')
 				break;
 
 			url = nextLink.get('href')
 
-			time.sleep(0.5)
+			time.sleep(1)
 
 sortedFlats = sorted(flats, key=lambda flat: flat.region.lat, reverse=True)
 
-regions = {4:[], 6:[], 13:[]}
+regions = {2: [], 4:[], 6:[], 13:[]}
 
 for flat in sortedFlats:
 	regions[flat.region.regionId].append(flat.toDict())
 
 jsonRegions = json.dumps(regions, indent = 2, ensure_ascii=False)
 
+print(len(uniqueUrls))
 
+date = datetime.today().strftime('%Y-%m-%d')
 
-with open('homesDataAll1Regions.txt', 'w+', encoding='utf-8') as file:
+with open('malopol_' + date + '_img.txt', 'w+', encoding='utf-8') as file:
 	file.write(jsonRegions)
+
+
+
 

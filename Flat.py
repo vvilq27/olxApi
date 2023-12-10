@@ -51,17 +51,23 @@ class Price:
 
 
 class Flat:
-	def __init__(self, city = '', regionName = '', regionId = '', price= '', rent= '', size= '', previousPrice= '', promoted= '', urgent= '', lat= '', lon= '', url= '', description = '', json = None):
+	def __init__(self, city = '', regionName = '', regionId = '', price= '', rent= '', size= '', previousPrice= '', promoted= '', urgent= '', lat= '', lon= '', url= '', description = '', userId = '', adId = '', photos = '', json = None):
 
 		self.region = Region(city, regionName, regionId, lat, lon)
 		self.price = Price(price, rent, size, previousPrice, promoted, urgent)
 
 		self.url = url
 		self.description = description
+		self.userId = userId
+		self.adId = adId
+		self.photos = photos
 
 		if json != None:
 			jsonRegion = json.get('region')
 			jsonPricing = json.get('pricing')
+
+			self.url = json.get('url')
+			self.description = json.get('description')
 
 			self.region = Region(jsonRegion.get('city'), jsonRegion.get('name'), jsonRegion.get('regionId'),
                         jsonRegion.get('lat'), jsonRegion.get('lon'))
@@ -70,19 +76,28 @@ class Flat:
                         jsonPricing.get('previousPrice'), jsonPricing.get('promoted'),  jsonPricing.get('urgent'))
 
 
-
 	def __str__(self):
-		return "{\n\"region\": {\n" + f"{self.region}" + "\n}," +\
-		"\n\"price\": {\n" + f"{self.price}" + "\n}\n}" 
+		return "{\"url\": " + f"{self.url}" + \
+		"\n\"region\": {\n" + f"{self.region}" + "\n}," +\
+		"\n\"price\": {\n" + f"{self.price}" + "\n}," + \
+		"\"desc\":\"" + f"{self.description}" + "\"\n}\n"
 
 	def toDict(self):
 			return {
+				"userId": self.userId,
+				"adId": self.adId,
 				"region" : self.region.toDict(),
-				"pricing": self.price.toDict()
+				"pricing": self.price.toDict(),
+				"url": self.url,
+				"description": self.description,
+				"photos": self.photos
 			}
 
 
 	def getTotalPrice(self):
-		return int(self.price.price) + int(self.price.rent);
+		if self.price.rent == 'no data':
+			return float(self.price.price);
+
+		return float(self.price.price) + float(self.price.rent);
 
 
