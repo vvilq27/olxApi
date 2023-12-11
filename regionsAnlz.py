@@ -67,7 +67,7 @@ def getDataFromFile(fileName):
 	return json.loads(data)
 
 
-path = 'C:/Users/shell/Documents/programin/python/olxApi/data/buy/2023-12-10/'
+path = 'C:/Users/shell/Documents/programin/python/olxApi/data/rent/2023-12-11/2/'
 files = os.listdir(path)
 
 for fileName in files:
