@@ -2,6 +2,7 @@ import json
 from Flat import Flat
 import statistics
 import sys
+import os
 
 filterFlats = True
 filterFlats = False
@@ -57,30 +58,38 @@ def filterFlat(flat, sizeFrom = 0, sizeTo = 222):
 #   },
 #   {
 
-data = None
+def getDataFromFile(fileName):
+	data = None
 
-fileName = sys.argv[1]
-print(fileName)
+	with open(fileName, "r", encoding= 'utf-8') as file:
+		data = file.read()
 
-with open(fileName, "r", encoding= 'utf-8') as file:
-	data = file.read()
+	return json.loads(data)
 
-jsonData = json.loads(data)
 
-j = jsonData
-prices = []
+path = 'C:/Users/shell/Documents/programin/python/olxApi/data/buy/2023-12-10/'
+files = os.listdir(path)
 
-for jsonFlat in j:
-	flat = buildFlat(jsonFlat)
-	if filterFlats and not filterFlat(flat, 25, 45):
-		continue
-	prices.append(flat.price.price)
+for fileName in files:
+	# fileName = sys.argv[1]
+	print(fileName)
 
-sortedPrices = sorted(prices, key=lambda price: price)
-median = sortedPrices[int(len(sortedPrices)/2)]
+	jsonData = getDataFromFile(path + fileName)
 
-print(median)
-print(len(sortedPrices))
-print(sortedPrices[:30])
-print()
-print(sortedPrices[-30:])
+	prices = []
+
+	for jsonFlat in jsonData:
+		flat = buildFlat(jsonFlat)
+		if filterFlats and not filterFlat(flat, 25, 45):
+			continue
+		prices.append(flat.price.price)
+
+	sortedPrices = sorted(prices, key=lambda price: price)
+	median = sortedPrices[int(len(sortedPrices)/2)]
+
+	print("Median: \t" + str(median))
+	print("number of flats: " + str(len(sortedPrices)))
+	print(sortedPrices[:30])
+	print()
+	print(sortedPrices[-30:])
+	print('\n')

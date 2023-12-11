@@ -39,44 +39,58 @@ urls = [
 ]
 
 dictUrls = {
-	'buy_krk':'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=14&region_id=4&city_id=8959&sort_by=filter_float_price%3Aasc&&filter_float_price%3Afrom={}',
-	'buy_katw_radius30':'https://www.olx.pl/api/v1/offers/?offset=0&limit=40&category_id=14&region_id=6&city_id=7691&distance=30&sort_by=filter_float_price%3Aasc&filter_float_price%3Afrom={}',
-	'buy_piotrkw_radius50':'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=14&region_id=7&city_id=13573&distance=50&sort_by=filter_float_price%3Aasc&&filter_float_price%3Afrom={}',
-	'buy_wwa': 'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=14&region_id=2&city_id=17871&sort_by=filter_float_price%3Aasc&&filter_float_price%3Afrom={}'
+	'buy':{
+		'buy_krk':'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=14&region_id=4&city_id=8959&sort_by=filter_float_price%3Aasc&&filter_float_price%3Afrom={}',
+		'buy_katw_radius30':'https://www.olx.pl/api/v1/offers/?offset=0&limit=40&category_id=14&region_id=6&city_id=7691&distance=30&sort_by=filter_float_price%3Aasc&filter_float_price%3Afrom={}',
+		'buy_piotrkw_radius50':'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=14&region_id=7&city_id=13573&distance=50&sort_by=filter_float_price%3Aasc&&filter_float_price%3Afrom={}',
+		'buy_wwa': 'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=14&region_id=2&city_id=17871&sort_by=filter_float_price%3Aasc&&filter_float_price%3Afrom={}'
+	},
+	'rent':{
+		'rent_slaske': 'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&region_id=6&filter_float_price%3Afrom={}&sort_by=filter_float_price%3Aasc',
+		'rent_swietok': 'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&region_id=13&filter_float_price%3Afrom={}&sort_by=filter_float_price%3Aasc',	
+		'rent_malopol': 'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&region_id=4&filter_float_price%3Afrom={}&sort_by=filter_float_price%3Aasc',
+		'rent_wwa': 'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&region_id=2&city_id=17871&filter_float_price%3Afrom={}&sort_by=filter_float_price%3Aasc',
+		'rent_ldz': 'https://www.olx.pl/api/v1/offers?offset=0&limit=40&category_id=15&region_id=7&filter_float_price%3Afrom={}&sort_by=filter_float_price%3Aasc'
+	}
 }
 
 
-fromPrice = 40000
+fromPrice = 400
 
 date = datetime.today().strftime('%Y-%m-%d')
 uniqueAdIds = set()
 total = 0
 
-path = 'data/buy/' + date + '/2'
+option = 'rent'
+# option = 'buy'
+
+path = 'data/' + option + '/' + date
 
 if not os.path.exists(path):
 	os.mkdir(path)
 
-for urlKey in dictUrls:
+for urlKey in dictUrls[option]:
 # for url in list(ductUrls.values()):
 	# url = next(iter(dictUrls.values()), None)
 	printOnce = True
 
-	urlFormated = dictUrls[urlKey].format(fromPrice)
+	urlFormated = dictUrls[option][urlKey].format(fromPrice)
 	fileName = path + "/" + urlKey + "_" + date + '.txt'
 
+	print("=================================")
+	print("REGION: " + urlKey)
 	print(fileName)
+	print("=================================")
 
 	with open(fileName, 'w+', encoding='utf-8') as file:
 
 		while urlFormated != 'finito':
-			print(".", end = '')
 			data = requests.get(urlFormated)
 
 			if printOnce:
 				data = requests.get(urlFormated)
 				total = data.json()['metadata']['visible_total_count']
-				print(total)
+				print("Area flats: " + str(total))
 				printOnce = False
 
 			if len(data.json()['data']) == 0:
@@ -116,7 +130,7 @@ for urlKey in dictUrls:
 				if localTotal < 1000:
 					lastPrice += 1
 
-				urlFormated = dictUrls[urlKey].format(lastPrice)
+				urlFormated = dictUrls[option][urlKey].format(lastPrice)
 				print("get link with updated price: \n" + urlFormated)
 				continue
 
